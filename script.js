@@ -1,31 +1,31 @@
-function enviarWhatsApp() {
+// Función genérica para enviar WhatsApp
+function enviarWhatsApp(formId, camposObligatorios, numeroDestino) {
     // Obtener los valores del formulario
-    const nombre = document.getElementById("nombre").value;
-    const tipoDcoumento = document.getElementById("tipoDocumento").value;
-    const numeroDocumento = document.getElementById("numeroDocumento").value;
-    const direccion = document.getElementById("direccion").value;
-    const correo = document.getElementById("correo").value;
-    const regimenTributario = document.getElementById("regimenTributario").value;
-    const mensajeAdicional = document.getElementById("mensaje").value;
+    const formulario = document.getElementById(formId);
+    const datosFormulario = {};
+
+    // Recopilar los datos del formulario
+    Array.from(formulario.elements).forEach(element => {
+        if (element.type !== "button" && element.type !== "submit") {
+            datosFormulario[element.name] = element.value;
+        }
+    });
 
     // Validar que los campos obligatorios estén completos
-    if (!nombre || !tipoDcoumento || !numeroDocumento || !direccion || !correo) {
-        alert("Por favor, completa todos los campos obligatorios antes de enviar.");
-        return;
+    for (const campo of camposObligatorios) {
+        if (!datosFormulario[campo]) {
+            alert(`Por favor, completa el campo ${campo} antes de enviar.`);
+            return;
+        }
     }
 
-    // Número de WhatsApp donde se enviará (formato internacional, sin '+')
-    const numeroDestino = "573225725739"; // Cambia esto al número de tu negocio.
-
     // Construir el mensaje
-    const mensajeCompleto = `
-        Nombre completo o razón social: ${nombre} 
-        Tipo de documento: ${tipoDcoumento} 
-        Numero de documento: ${numeroDocumento} 
-        Dirección: ${direccion}. Correo electrónico: ${correo}.
-        ${regimenTributario ? "Régimen tributario: " + regimenTributario : ""}
-        ${mensajeAdicional ? "Detalles adicionales: " + mensajeAdicional : ""}
-        `;
+    let mensajeCompleto = "";
+    for (const [campo, valor] of Object.entries(datosFormulario)) {
+        if (valor) {
+            mensajeCompleto += `${campo.charAt(0).toUpperCase() + campo.slice(1)}: ${valor}\n`;
+        }
+    }
 
     // Codificar el mensaje para URL
     const mensajeCodificado = encodeURIComponent(mensajeCompleto);
@@ -35,4 +35,18 @@ function enviarWhatsApp() {
 
     // Redirigir al enlace
     window.open(enlace, "_blank");
+}
+
+// Función para enviar WhatsApp para Persona Natural
+function enviarWhatsAppPersonaNatural() {
+    const camposObligatorios = ["nombre", "tipoDocumento", "numeroDocumento", "direccion", "correo"];
+    const numeroDestino = "573225725739"; // Cambia esto al número de tu negocio
+    enviarWhatsApp("cotizacionForm", camposObligatorios, numeroDestino);
+}
+
+// Función para enviar WhatsApp para Persona Jurídica
+function enviarWhatsAppPersonaJuridica() {
+    const camposObligatorios = ["razonSocial", "numeroNit", "direccion", "correo"];
+    const numeroDestino = "573225725739"; // Cambia esto al número de tu negocio
+    enviarWhatsApp("cotizacionForm", camposObligatorios, numeroDestino);
 }
